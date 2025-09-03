@@ -21,13 +21,16 @@ def create_project(db: Session, project: schemas.ProjectCreate, owner_id: int):
     db.refresh(db_project)
     return db_project
 
+def get_user_projects(db: Session, user_id: int):
+    return db.query(models.Project).filter(models.Project.owner_id == user_id).all()
+
 def create_document(db: Session, filename: str, content: str, project_id: int, owner_id: int, metadata: dict):
     db_doc = models.Document(
         filename=filename,
         content=content,
         project_id=project_id,
         owner_id=owner_id,
-        metadata=json.dumps(metadata)
+        doc_metadata=json.dumps(metadata)  # Fixed field name
     )
     db.add(db_doc)
     db.commit()
@@ -35,7 +38,7 @@ def create_document(db: Session, filename: str, content: str, project_id: int, o
     return db_doc
 
 def search_documents(db: Session, query: str):
-    # Full-text search using PostgreSQL's to_tsvector and plainto_tsquery
-    return db.query(models.Document).filter(models.Document.content_vector.op("@@")(
-        "plainto_tsquery('english', :query)"
-    )).params(query=query).all()
+    # Simple text search for SQLite compatibility
+    return db.query(models.Document).filter(
+        models.Document.content.contains(query)
+    ).all()
