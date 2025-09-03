@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, Field
 from typing import Optional, List, Dict
+import json
 
 class UserCreate(BaseModel):
     username: str
@@ -11,7 +12,7 @@ class UserRead(BaseModel):
     role: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ProjectCreate(BaseModel):
     name: str
@@ -25,7 +26,14 @@ class ProjectRead(BaseModel):
     fields: Dict
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        
+    @field_validator('fields', mode='before')
+    @classmethod
+    def parse_fields(cls, v):
+        if isinstance(v, str):
+            return json.loads(v) if v else {}
+        return v if v is not None else {}
 
 class DocumentCreate(BaseModel):
     filename: str
@@ -36,12 +44,20 @@ class DocumentRead(BaseModel):
     id: int
     filename: str
     content: str
-    metadata: Dict
+    metadata: Dict = Field(alias='doc_metadata')
     project_id: int
     owner_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        populate_by_name = True
+        
+    @field_validator('metadata', mode='before')
+    @classmethod
+    def parse_metadata(cls, v):
+        if isinstance(v, str):
+            return json.loads(v) if v else {}
+        return v if v is not None else {}
 
 class SearchResults(BaseModel):
     results: List[DocumentRead]
