@@ -1,13 +1,29 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import users, projects, documents, search
 
 app = FastAPI(title="Intelligent Document Management System")
 
+# Get allowed origins from environment variable, with sensible defaults for development
+# For production, set CORS_ORIGINS environment variable to comma-separated list of allowed origins
+# Example: CORS_ORIGINS="https://yourdomain.com,https://www.yourdomain.com"
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "").split(",") if os.getenv("CORS_ORIGINS") else [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",  # Alternative React dev port
+    "http://127.0.0.1:3001",
+    "http://0.0.0.0:3000",    # Docker networking
+    "http://0.0.0.0:3001",
+]
+
+# Remove empty strings from the list
+CORS_ORIGINS = [origin.strip() for origin in CORS_ORIGINS if origin.strip()]
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # React dev server
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

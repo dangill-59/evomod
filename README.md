@@ -165,9 +165,37 @@ SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
+# CORS Configuration
+# For development, the default origins include localhost:3000, 127.0.0.1:3000, etc.
+# For production, specify your allowed origins as a comma-separated list:
+# CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+
 # OCR (if using external service)
 TESSERACT_PATH=/usr/bin/tesseract
 ```
+
+## Troubleshooting
+
+### CORS Issues
+
+If you encounter CORS errors like "Access to XMLHttpRequest has been blocked by CORS policy", check the following:
+
+1. **Development**: The default configuration allows common development origins (`localhost:3000`, `127.0.0.1:3000`, etc.)
+
+2. **Custom Port**: If your frontend runs on a different port, set the `CORS_ORIGINS` environment variable:
+   ```bash
+   export CORS_ORIGINS="http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000"
+   ```
+
+3. **Production**: Always specify exact origins in production:
+   ```bash
+   export CORS_ORIGINS="https://yourdomain.com,https://www.yourdomain.com"
+   ```
+
+4. **Docker**: When using Docker, include container networking origins:
+   ```bash
+   export CORS_ORIGINS="http://localhost:3000,http://0.0.0.0:3000"
+   ```
 
 ## Contributing
 
