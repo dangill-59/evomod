@@ -25,7 +25,18 @@ const Projects = () => {
       setNewProject({ name: '', description: '' });
       setShowCreateForm(false);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to create project');
+      console.error('Create project error:', err);
+      let errorMessage = 'Failed to create project';
+      
+      if (err.response?.data?.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+          errorMessage = err.response.data.detail.map(e => e.msg).join(', ');
+        } else {
+          errorMessage = err.response.data.detail;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

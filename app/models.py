@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime, Table, Boolean
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.sql import func
 from app.database import Base
 
@@ -28,10 +27,10 @@ class Document(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String, index=True)
     content = Column(Text)
-    content_vector = Column(TSVECTOR)
+    # Removed TSVECTOR for SQLite compatibility
     project_id = Column(Integer, ForeignKey("projects.id"))
     owner_id = Column(Integer, ForeignKey("users.id"))
-    doc_metadata = Column(Text)  # <-- changed from 'metadata'
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    doc_metadata = Column(Text)  # JSON string for metadata
+    created_at = Column(DateTime, default=func.now())
     project = relationship("Project", back_populates="documents")
     owner = relationship("User", back_populates="documents")

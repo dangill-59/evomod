@@ -3,8 +3,14 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://postgres:postgres@db:5432/postgres")
+# Use SQLite for local development if PostgreSQL is not available
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./test.db")
 
-engine = create_engine(DATABASE_URL)
+# For SQLite, we need check_same_thread=False
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
