@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { projectsAPI } from '../services/api';
 
 const Projects = () => {
@@ -10,6 +10,21 @@ const Projects = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Fetch projects when component mounts
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await projectsAPI.list();
+        setProjects(response.data);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError('Failed to load projects');
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
