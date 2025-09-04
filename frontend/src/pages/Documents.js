@@ -29,7 +29,18 @@ const Documents = () => {
       setProjectId('');
       setShowUploadForm(false);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to upload document');
+      console.error('Upload document error:', err);
+      let errorMessage = 'Failed to upload document';
+      
+      if (err.response?.data?.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+          errorMessage = err.response.data.detail.map(e => e.msg).join(', ');
+        } else {
+          errorMessage = err.response.data.detail;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
