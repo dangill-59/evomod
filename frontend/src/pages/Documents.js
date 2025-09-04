@@ -1,18 +1,40 @@
-import React, { useState } from 'react';
-import { documentsAPI } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { documentsAPI, projectsAPI } from '../services/api';
 
 const Documents = () => {
   const [documents, setDocuments] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [projectId, setProjectId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Fetch projects when component mounts
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await projectsAPI.list();
+        setProjects(response.data);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError('Failed to load projects');
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  // Helper function to get project name by ID
+  const getProjectName = (projectId) => {
+    const project = projects.find(p => p.id === projectId);
+    return project ? project.name : `Project ID: ${projectId}`;
+  };
+
   const handleFileUpload = async (e) => {
     e.preventDefault();
     if (!selectedFile || !projectId) {
-      setError('Please select a file and enter a project ID');
+      setError('Please select a file and choose a project');
       return;
     }
 
@@ -92,15 +114,25 @@ const Documents = () => {
           <h3>Upload New Document</h3>
           <form onSubmit={handleFileUpload}>
             <div>
-              <label>Project ID:</label>
-              <input
-                type="number"
+              <label>Project:</label>
+              <select
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
                 required
                 style={inputStyle}
-                placeholder="Enter the project ID where this document belongs"
-              />
+              >
+                <option value="">Select a project...</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+              {projects.length === 0 && (
+                <p style={{ color: '#666', fontSize: '14px', marginTop: '5px' }}>
+                  No projects available. Create a project first to upload documents.
+                </p>
+              )}
             </div>
             <div>
               <label>Select File:</label>
@@ -135,7 +167,7 @@ const Documents = () => {
           documents.map((document) => (
             <div key={document.id} style={cardStyle}>
               <h3>{document.filename}</h3>
-              <p>Project ID: {document.project_id}</p>
+              <p>Project: {getProjectName(document.project_id)}</p>
               <p>Uploaded by: User ID {document.owner_id}</p>
               {document.content && (
                 <div>
