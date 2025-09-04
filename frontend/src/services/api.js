@@ -60,6 +60,8 @@ export const projectsAPI = {
   list: () => api.get('/projects/'),
   
   get: (id) => api.get(`/projects/${id}`),
+  
+  delete: (id) => api.delete(`/projects/${id}`),
 };
 
 // Documents API

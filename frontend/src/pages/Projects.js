@@ -57,6 +57,31 @@ const Projects = () => {
     }
   };
 
+  const handleDeleteProject = async (projectId) => {
+    if (!window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      setError('');
+      await projectsAPI.delete(projectId);
+      setProjects(projects.filter(project => project.id !== projectId));
+    } catch (err) {
+      console.error('Delete project error:', err);
+      let errorMessage = 'Failed to delete project';
+      
+      if (err.response?.data?.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+          errorMessage = err.response.data.detail.map(e => e.msg).join(', ');
+        } else {
+          errorMessage = err.response.data.detail;
+        }
+      }
+      
+      setError(errorMessage);
+    }
+  };
+
   const cardStyle = {
     border: '1px solid #ddd',
     borderRadius: '8px',
@@ -67,6 +92,16 @@ const Projects = () => {
 
   const buttonStyle = {
     backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    marginRight: '10px',
+  };
+
+  const deleteButtonStyle = {
+    backgroundColor: '#dc3545',
     color: 'white',
     border: 'none',
     padding: '10px 20px',
@@ -142,6 +177,12 @@ const Projects = () => {
               <h3>{project.name}</h3>
               <p>{project.description || 'No description provided'}</p>
               <button style={buttonStyle}>View Documents</button>
+              <button 
+                style={deleteButtonStyle}
+                onClick={() => handleDeleteProject(project.id)}
+              >
+                Delete Project
+              </button>
             </div>
           ))
         )}

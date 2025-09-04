@@ -24,6 +24,23 @@ def create_project(db: Session, project: schemas.ProjectCreate, owner_id: int):
 def get_user_projects(db: Session, user_id: int):
     return db.query(models.Project).filter(models.Project.owner_id == user_id).all()
 
+def delete_project(db: Session, project_id: int, user_id: int):
+    project = db.query(models.Project).filter(
+        models.Project.id == project_id,
+        models.Project.owner_id == user_id
+    ).first()
+    if project:
+        db.delete(project)
+        db.commit()
+        return True
+    return False
+
+def get_project_by_id(db: Session, project_id: int, user_id: int):
+    return db.query(models.Project).filter(
+        models.Project.id == project_id,
+        models.Project.owner_id == user_id
+    ).first()
+
 def create_document(db: Session, filename: str, content: str, project_id: int, owner_id: int, metadata: dict):
     db_doc = models.Document(
         filename=filename,
