@@ -4,8 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.routers import users, projects, documents, search
+from app.database import engine, Base
+from app.models import User, Project, Document
 
 app = FastAPI(title="Intelligent Document Management System")
+
+@app.on_event("startup")
+def create_tables():
+    """Create database tables on application startup"""
+    Base.metadata.create_all(bind=engine)
 
 # Get allowed origins from environment variable, with sensible defaults for development
 # For production, set CORS_ORIGINS environment variable to comma-separated list of allowed origins
